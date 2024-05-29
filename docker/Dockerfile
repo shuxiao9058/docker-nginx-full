@@ -2,6 +2,10 @@
 # Nginx Builder
 #############
 
+# docker build --build-arg OPENRESTY_VERSION=1.25.3.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.3.1 CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7 -t shuxiao9058/nginx-full:latest - < docker/Dockerfile
+# docker buildx build --build-arg OPENRESTY_VERSION=1.25.3.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.3.1 --build-arg CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7 -t shuxiao9058/nginx-full:latest --platform linux/amd64 - < docker/Dockerfile
+# docker buildx build --platform linux/arm64 -f Dockerfile .
+
 FROM debian:buster-slim as nginxbuilder
 
 ARG OPENRESTY_VERSION
@@ -88,7 +92,7 @@ ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
 
 # Install openresty, lua, then clean up file system
 RUN apt-get update \
-	&& apt-get install -y gcc make socat git \
+	&& apt-get install -y gcc make socat git vim procps \
 	&& /tmp/install-lua \
 	&& /tmp/install-openresty \
 	&& apt-get remove -y make gcc git wget gettext \
@@ -96,6 +100,14 @@ RUN apt-get update \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/cache/* /var/log/* /tmp/* /var/lib/dpkg/status-old
+
+RUN groupadd -g 568 apps
+RUN useradd apps -u 568 -g 568 -m -s /bin/bash
+RUN mkdir -p /var/log/nginx
+RUN chown apps:apps -R /var/log/nginx
+RUN mkdir -p /var/cache/nginx/
+RUN chown apps:apps -R /var/cache/nginx
+RUN sed -i 's/#user  nobody;/user  apps apps;/g' /etc/nginx/nginx.conf
 
 LABEL org.label-schema.schema-version="1.0" \
 	org.label-schema.license="MIT" \

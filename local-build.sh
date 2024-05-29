@@ -8,7 +8,7 @@ RESET='\E[0m'
 
 DOCKER_IMAGE=jc21/nginx-full
 
-export OPENRESTY_VERSION=1.21.4.2
+export OPENRESTY_VERSION=1.25.3.1
 export CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7
 export LUA_VERSION=5.1.5
 export LUAROCKS_VERSION=3.3.1
@@ -23,35 +23,36 @@ docker build \
 	--build-arg LUA_VERSION \
 	--build-arg LUAROCKS_VERSION \
 	-t ${DOCKER_IMAGE}:latest \
+	--platform linux/amd64 \
 	-f docker/Dockerfile \
 	.
 
-echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}acmesh ${CYAN}...${RESET}"
-docker build \
-	--build-arg BASE_TAG=latest \
-	-t ${DOCKER_IMAGE}:acmesh \
-	-f docker/Dockerfile.acmesh \
-	.
-
-echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}certbot ${CYAN}...${RESET}"
-docker build \
-	--build-arg BASE_TAG=latest \
-	-t ${DOCKER_IMAGE}:certbot \
-	-f docker/Dockerfile.certbot \
-	.
-
-echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}acmesh-golang ${CYAN}...${RESET}"
-docker build \
-	--build-arg BASE_TAG=acmesh \
-	-t ${DOCKER_IMAGE}:acmesh-golang \
-	-f docker/Dockerfile.acmesh-golang \
-	.
-
-echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}certbot-node ${CYAN}...${RESET}"
-docker build \
-	--build-arg BASE_TAG=certbot \
-	-t ${DOCKER_IMAGE}:certbot-node \
-	-f docker/Dockerfile.certbot-node \
-	.
+# echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}acmesh ${CYAN}...${RESET}"
+# docker build \
+# 	--build-arg BASE_TAG=latest \
+# 	-t ${DOCKER_IMAGE}:acmesh \
+# 	-f docker/Dockerfile.acmesh \
+# 	.
+# 
+# echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}certbot ${CYAN}...${RESET}"
+# docker build \
+# 	--build-arg BASE_TAG=latest \
+# 	-t ${DOCKER_IMAGE}:certbot \
+# 	-f docker/Dockerfile.certbot \
+# 	.
+# 
+# echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}acmesh-golang ${CYAN}...${RESET}"
+# docker build \
+# 	--build-arg BASE_TAG=acmesh \
+# 	-t ${DOCKER_IMAGE}:acmesh-golang \
+# 	-f docker/Dockerfile.acmesh-golang \
+# 	.
+# 
+# echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}certbot-node ${CYAN}...${RESET}"
+# docker build \
+# 	--build-arg BASE_TAG=certbot \
+# 	-t ${DOCKER_IMAGE}:certbot-node \
+# 	-f docker/Dockerfile.certbot-node \
+# 	.
 
 echo -e "${BLUE}❯ ${GREEN}All done!${RESET}"
