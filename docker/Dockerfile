@@ -2,11 +2,12 @@
 # Nginx Builder
 #############
 
+<<<<<<< HEAD
 # docker build --build-arg OPENRESTY_VERSION=1.25.3.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.3.1 CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7 -t shuxiao9058/nginx-full:latest - < docker/Dockerfile
 # docker buildx build --build-arg OPENRESTY_VERSION=1.25.3.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.3.1 --build-arg CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7 -t shuxiao9058/nginx-full:latest --platform linux/amd64 - < docker/Dockerfile
 # docker buildx build --platform linux/arm64 -f Dockerfile .
 
-FROM debian:buster-slim as nginxbuilder
+FROM debian:bookworm-slim as nginxbuilder
 
 ARG OPENRESTY_VERSION
 ARG LUA_VERSION
@@ -24,7 +25,8 @@ RUN apt-get update \
 	wget \
 	zlib1g-dev \
 	libxslt-dev \
-	git
+	git \
+	libmaxminddb-dev
 
 # Lua build
 COPY ./scripts/build-lua /tmp/build-lua
@@ -38,13 +40,13 @@ RUN /tmp/build-openresty
 # Final Image
 #############
 
-FROM debian:buster-slim
+FROM debian:bookworm-slim as final
 LABEL maintainer="Jamie Curnow <jc@jc21.com>"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG TARGETPLATFORM
-RUN echo "Base: debian:buster-slim, ${TARGETPLATFORM:-linux/amd64}" > /built-for-arch
+RUN echo "Base: debian:bookworm-slim, ${TARGETPLATFORM:-linux/amd64}" > /built-for-arch
 
 # OpenResty uses LuaJIT which has a dependency on GCC
 RUN apt-get update \
@@ -56,7 +58,7 @@ RUN apt-get update \
 	jq \
 	libncurses6 \
 	libpcre3 \
-	libreadline7 \
+	libreadline8 \
 	openssl \
 	perl \
 	tzdata \
@@ -66,6 +68,7 @@ RUN apt-get update \
 	wget \
 	libxslt-dev \
 	xz-utils \
+	libmaxminddb-dev \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/cache/* /var/log/* /tmp/* /var/lib/dpkg/status-old
@@ -115,4 +118,4 @@ LABEL org.label-schema.schema-version="1.0" \
 	org.label-schema.description="A base image for use by Nginx Proxy Manager" \
 	org.label-schema.url="https://github.com/nginxproxymanager/docker-nginx-full" \
 	org.label-schema.vcs-url="https://github.com/nginxproxymanager/docker-nginx-full.git" \
-	org.label-schema.cmd="docker run --rm -ti jc21/nginx-full:latest"
+	org.label-schema.cmd="docker run --rm -ti nginxproxymanager/nginx-full:latest"

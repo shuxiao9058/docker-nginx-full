@@ -6,7 +6,7 @@ YELLOW='\E[1;33m'
 GREEN='\E[1;32m'
 RESET='\E[0m'
 
-DOCKER_IMAGE=jc21/nginx-full
+DOCKER_IMAGE="nginxproxymanager/nginx-full"
 
 export OPENRESTY_VERSION=1.25.3.1
 export CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7
@@ -29,29 +29,29 @@ docker build \
 
 # echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}acmesh ${CYAN}...${RESET}"
 # docker build \
-# 	--build-arg BASE_TAG=latest \
-# 	-t ${DOCKER_IMAGE}:acmesh \
+# 	--build-arg BASE_IMAGE \
+# 	-t "$ACMESH_IMAGE" \
 # 	-f docker/Dockerfile.acmesh \
 # 	.
-# 
+
 # echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}certbot ${CYAN}...${RESET}"
 # docker build \
-# 	--build-arg BASE_TAG=latest \
-# 	-t ${DOCKER_IMAGE}:certbot \
+# 	--build-arg BASE_IMAGE \
+# 	-t "$CERTBOT_IMAGE" \
 # 	-f docker/Dockerfile.certbot \
 # 	.
-# 
+
 # echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}acmesh-golang ${CYAN}...${RESET}"
 # docker build \
-# 	--build-arg BASE_TAG=acmesh \
-# 	-t ${DOCKER_IMAGE}:acmesh-golang \
+# 	--build-arg ACMESH_IMAGE \
+# 	-t "$ACMESH_GOLANG_IMAGE" \
 # 	-f docker/Dockerfile.acmesh-golang \
 # 	.
-# 
+
 # echo -e "${BLUE}❯ ${CYAN}Building ${YELLOW}certbot-node ${CYAN}...${RESET}"
 # docker build \
-# 	--build-arg BASE_TAG=certbot \
-# 	-t ${DOCKER_IMAGE}:certbot-node \
+# 	--build-arg CERTBOT_IMAGE \
+# 	-t "$CERTBOT_NODE_IMAGE" \
 # 	-f docker/Dockerfile.certbot-node \
 # 	.
 
