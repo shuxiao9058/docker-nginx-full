@@ -2,12 +2,11 @@
 # Nginx Builder
 #############
 
-<<<<<<< HEAD
 # docker build --build-arg OPENRESTY_VERSION=1.25.3.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.3.1 CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7 -t shuxiao9058/nginx-full:latest - < docker/Dockerfile
 # docker buildx build --build-arg OPENRESTY_VERSION=1.25.3.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.3.1 --build-arg CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7 -t shuxiao9058/nginx-full:latest --platform linux/amd64 - < docker/Dockerfile
 # docker buildx build --platform linux/arm64 -f Dockerfile .
 
-FROM debian:bookworm-slim as nginxbuilder
+FROM debian:bookworm-slim AS nginxbuilder
 
 ARG OPENRESTY_VERSION
 ARG LUA_VERSION
@@ -40,7 +39,7 @@ RUN /tmp/build-openresty
 # Final Image
 #############
 
-FROM debian:bookworm-slim as final
+FROM debian:bookworm-slim AS final
 LABEL maintainer="Jamie Curnow <jc@jc21.com>"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
