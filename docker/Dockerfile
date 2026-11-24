@@ -2,22 +2,26 @@
 # Nginx Builder
 #############
 
-# docker build --build-arg OPENRESTY_VERSION=1.25.3.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.3.1 CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7 -t shuxiao9058/nginx-full:latest - < docker/Dockerfile
-# docker buildx build --build-arg OPENRESTY_VERSION=1.25.3.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.3.1 --build-arg CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7 -t shuxiao9058/nginx-full:latest --platform linux/amd64 - < docker/Dockerfile
-# docker buildx build --platform linux/arm64 -f Dockerfile .
+# docker build --build-arg OPENRESTY_VERSION=1.31.9.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.13.0 -t shuxiao9058/nginx-full:latest -f docker/Dockerfile .
+# docker buildx build --platform linux/amd64 --build-arg OPENRESTY_VERSION=1.31.9.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.13.0 -t shuxiao9058/nginx-full:latest -f docker/Dockerfile .
+# docker buildx build --platform linux/arm64 --build-arg OPENRESTY_VERSION=1.31.9.1 --build-arg LUA_VERSION=5.1.5 --build-arg LUAROCKS_VERSION=3.13.0 -f docker/Dockerfile .
 
-FROM debian:bookworm-slim AS nginxbuilder
+FROM debian:trixie-slim AS nginxbuilder
 
 ARG OPENRESTY_VERSION
 ARG LUA_VERSION
 ARG LUAROCKS_VERSION
+
+ENV OPENRESTY_VERSION=${OPENRESTY_VERSION} \
+	LUA_VERSION=${LUA_VERSION} \
+	LUAROCKS_VERSION=${LUAROCKS_VERSION}
 
 RUN apt-get update \
 	&& apt-get install -y \
 	build-essential \
 	ca-certificates \
 	libncurses-dev \
-	libpcre3-dev \
+	libpcre2-dev \
 	libreadline-dev \
 	libssl-dev \
 	openssl unzip \
@@ -25,27 +29,28 @@ RUN apt-get update \
 	zlib1g-dev \
 	libxslt-dev \
 	git \
-	libmaxminddb-dev
+	libmaxminddb-dev \
+	dos2unix
 
 # Lua build
-COPY ./scripts/build-lua /tmp/build-lua
-RUN /tmp/build-lua
+COPY ./docker/scripts/build-lua.sh /tmp/build-lua.sh
+RUN /tmp/build-lua.sh
 
 # Nginx build
-COPY ./scripts/build-openresty /tmp/build-openresty
-RUN /tmp/build-openresty
+COPY ./docker/scripts/build-openresty.sh /tmp/build-openresty.sh
+RUN /tmp/build-openresty.sh
 
 #############
 # Final Image
 #############
 
-FROM debian:bookworm-slim AS final
+FROM debian:trixie-slim AS final
 LABEL maintainer="Jamie Curnow <jc@jc21.com>"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG TARGETPLATFORM
-RUN echo "Base: debian:bookworm-slim, ${TARGETPLATFORM:-linux/amd64}" > /built-for-arch
+RUN echo "Base: debian:trixie-slim, ${TARGETPLATFORM:-linux/amd64}" > /built-for-arch
 
 # OpenResty uses LuaJIT which has a dependency on GCC
 RUN apt-get update \
@@ -56,7 +61,7 @@ RUN apt-get update \
 	figlet \
 	jq \
 	libncurses6 \
-	libpcre3 \
+	libpcre2-8-0 \
 	libreadline8 \
 	openssl \
 	perl \
@@ -68,35 +73,31 @@ RUN apt-get update \
 	libxslt-dev \
 	xz-utils \
 	libmaxminddb-dev \
+	moreutils \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/cache/* /var/log/* /tmp/* /var/lib/dpkg/status-old
 
-COPY ./files/.bashrc /root/.bashrc
+COPY ./docker/files/.bashrc /root/.bashrc
 
 # Copy lua and luarocks builds from first image
 COPY --from=nginxbuilder /tmp/lua /tmp/lua
 COPY --from=nginxbuilder /tmp/luarocks /tmp/luarocks
-COPY ./scripts/install-lua /tmp/install-lua
+COPY ./docker/scripts/install-lua.sh /tmp/install-lua.sh
 
 # Copy openresty build from first image
 COPY --from=nginxbuilder /tmp/openresty /tmp/openresty
-COPY ./scripts/install-openresty /tmp/install-openresty
-
-# Copy crowdsec openresty bouncer install script
-COPY ./scripts/install-crowdsec_openresty_bouncer /tmp/install-crowdsec_openresty_bouncer
+COPY ./docker/scripts/install-openresty.sh /tmp/install-openresty.sh
 
 ARG OPENRESTY_VERSION
-ARG CROWDSEC_OPENRESTY_BOUNCER_VERSION
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
-	OPENRESTY_VERSION=${OPENRESTY_VERSION} \
-	CROWDSEC_OPENRESTY_BOUNCER_VERSION=${CROWDSEC_OPENRESTY_BOUNCER_VERSION}
+	OPENRESTY_VERSION=${OPENRESTY_VERSION}
 
 # Install openresty, lua, then clean up file system
 RUN apt-get update \
 	&& apt-get install -y gcc make socat git vim procps \
-	&& /tmp/install-lua \
-	&& /tmp/install-openresty \
+	&& /tmp/install-lua.sh \
+	&& /tmp/install-openresty.sh \
 	&& apt-get remove -y make gcc git wget gettext \
 	&& apt-get autoremove -y \
 	&& apt-get clean \

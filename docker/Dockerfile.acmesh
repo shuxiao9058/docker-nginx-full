@@ -1,15 +1,13 @@
-ARG BASE_IMAGE=nginxproxymanager/nginx-full:latest
-FROM $BASE_IMAGE AS final
-ARG BASE_IMAGE
+FROM base
 ARG TARGETPLATFORM
 
 LABEL maintainer="Jamie Curnow <jc@jc21.com>"
 
-RUN echo "Acme.sh: $BASE_IMAGE, ${TARGETPLATFORM:-linux/amd64}" >> /built-for-arch
+RUN echo "Acme.sh, ${TARGETPLATFORM:-linux/amd64}" >> /built-for-arch
 
 ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-COPY ./files/.bashrc.acmesh /root/.bashrc
+COPY ./docker/files/.bashrc.acmesh /root/.bashrc
 
 # acme.sh
 RUN curl -o /tmp/acme.sh 'https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh' \
@@ -22,10 +20,9 @@ ENV ACMESH_CONFIG_HOME=/data/.acme.sh/config \
 	LE_WORKING_DIR=/data/.acme.sh
 
 # this wrapper handles all the setup required for acme.sh and running commands for it
-COPY ./files/acme.sh-wrapper /bin/acme.sh
+COPY ./docker/files/acme.sh-wrapper /bin/acme.sh
 
 # Test that the wrapper script is working
 RUN /bin/acme.sh -h
 
 LABEL org.label-schema.cmd="docker run --rm -ti nginxproxymanager/nginx-full:acmesh"
-

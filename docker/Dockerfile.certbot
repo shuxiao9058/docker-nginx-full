@@ -1,10 +1,8 @@
-ARG BASE_IMAGE=nginxproxymanager/nginx-full:latest
-
 #############
 # Certbot Builder
 #############
 
-FROM debian:bookworm-slim AS certbotbuilder
+FROM debian:trixie-slim AS certbotbuilder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -34,34 +32,30 @@ ENV PATH="/opt/certbot/bin:$PATH"
 
 RUN curl -L 'https://bootstrap.pypa.io/get-pip.py' | python3
 
-RUN pip install --no-cache-dir --upgrade pyopenssl \
-	&& pip install --no-cache-dir cffi certbot cryptography \
-	&& pip install tldextract zope
+RUN pip install --no-cache-dir --upgrade 'pyopenssl' \
+	&& pip install --no-cache-dir 'cffi' 'certbot' 'cryptography' \
+	&& pip install 'tldextract' 'zope' 'pip-system-certs'
 
 #############
 # Final Image
 #############
-FROM $BASE_IMAGE AS final
-ARG BASE_IMAGE
+FROM base
+
 ARG TARGETPLATFORM
 
 LABEL maintainer="Jamie Curnow <jc@jc21.com>"
 
-RUN echo "Certbot: $BASE_IMAGE, ${TARGETPLATFORM:-linux/amd64}" >> /built-for-arch
-
-COPY scripts/install-cert-prune /tmp/install-cert-prune
-RUN /tmp/install-cert-prune "${TARGETPLATFORM:-linux/amd64}" && rm -f /tmp/install-cert-prune
+RUN echo "Certbot, ${TARGETPLATFORM:-linux/amd64}" >> /built-for-arch
 
 # OpenResty uses LuaJIT which has a dependency on GCC
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 	python3 \
-	python3-distutils \
 	python3-venv \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
-COPY ./files/.bashrc.certbot /root/.bashrc
+COPY ./docker/files/.bashrc.certbot /root/.bashrc
 
 # Copy certbot
 COPY --from=certbotbuilder /opt/certbot /opt/certbot

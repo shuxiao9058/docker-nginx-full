@@ -9,18 +9,27 @@ RESET='\E[0m'
 echo -e "${BLUE}❯ ${CYAN}Building OpenResty ${YELLOW}${OPENRESTY_VERSION} with nginx_http_geoip2 module...${RESET}"
 
 cd /tmp
-wget "https://openresty.org/download/openresty-${OPENRESTY_VERSION}.tar.gz"
-tar -xzf openresty-${OPENRESTY_VERSION}.tar.gz
-mv /tmp/openresty-${OPENRESTY_VERSION} /tmp/openresty
+
+# The official releases:
+# wget "https://openresty.org/download/openresty-${OPENRESTY_VERSION}.tar.gz" -O "openresty-${OPENRESTY_VERSION}.tar.gz"
+
+# The github tagged releases:
+wget "https://github.com/openresty/openresty/archive/refs/tags/v${OPENRESTY_VERSION}.tar.gz" -O "openresty-${OPENRESTY_VERSION}.tar.gz"
+
+tar -xzf "openresty-${OPENRESTY_VERSION}.tar.gz"
+mv "/tmp/openresty-${OPENRESTY_VERSION}" /tmp/openresty
 
 wget "https://github.com/arut/nginx-dav-ext-module/archive/refs/heads/master.tar.gz" -O nginx-dav-ext-module.tar.gz
 tar zxvf nginx-dav-ext-module.tar.gz
 mv nginx-dav-ext-module-master /tmp/openresty/nginx-dav-ext-module
 
-git clone https://github.com/leev/ngx_http_geoip2_module.git
+git clone 'https://github.com/leev/ngx_http_geoip2_module.git'
 mv /tmp/ngx_http_geoip2_module /tmp/openresty/ngx_http_geoip2_module
-
 cd /tmp/openresty
+
+make
+
+cd "/tmp/openresty/openresty-${OPENRESTY_VERSION}"
 
 ./configure \
 	--prefix=/etc/nginx \
@@ -42,7 +51,7 @@ cd /tmp/openresty
 	--with-threads \
 	--with-http_addition_module \
 	--with-http_auth_request_module \
-	--with-http_dav_module --add-module=nginx-dav-ext-module \
+	--with-http_dav_module --add-module=/tmp/openresty/nginx-dav-ext-module \
 	--with-http_flv_module \
 	--with-http_gunzip_module \
 	--with-http_gzip_static_module \
@@ -61,8 +70,10 @@ cd /tmp/openresty
 	--with-stream_realip_module \
 	--with-stream_ssl_module \
 	--with-stream_ssl_preread_module \
+	--with-http_v3_module \
 	--add-dynamic-module=/tmp/openresty/ngx_http_geoip2_module
 
-make -j2
+make -j"$(nproc)"
 
 echo -e "${BLUE}❯ ${GREEN}OpenResty build completed${RESET}"
+

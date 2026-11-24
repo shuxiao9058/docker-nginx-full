@@ -1,9 +1,9 @@
 # nginx-full
 
 <p>
-  <img src="https://img.shields.io/badge/openresty-1.25.3.2-green.svg?style=for-the-badge">
+  <img src="https://img.shields.io/badge/openresty-1.31.9.1-green.svg?style=for-the-badge">
   <img src="https://img.shields.io/badge/lua-5.1.5-green.svg?style=for-the-badge">
-  <img src="https://img.shields.io/badge/luarocks-3.3.1-green.svg?style=for-the-badge">
+  <img src="https://img.shields.io/badge/luarocks-3.13.0-green.svg?style=for-the-badge">
   <a href="https://hub.docker.com/repository/docker/nginxproxymanager/nginx-full">
     <img src="https://img.shields.io/docker/stars/nginxproxymanager/nginx-full.svg?style=for-the-badge">
   </a>
@@ -19,7 +19,6 @@ The following images are built:
 **latest**
 - OpenResty
 - Lua
-- [Crowdsec Openresty Bouncer](https://github.com/crowdsecurity/cs-openresty-bouncer)
 
 **certbot**
 - Certbot
@@ -40,7 +39,6 @@ The following images are built:
 The following architectures are supported for all images:
 
 - amd64
-- arm/v7
 - arm64
 
 ### Usage:
@@ -58,4 +56,13 @@ docker run \
   -v /path/to/local/acme-data:/data/.acme.sh \
   nginxproxymanager/nginx-full:acmesh \
   acme.sh -h
+```
+
+### Building locally
+
+```
+./scripts/bake.sh --load
+
+# to save time, only build for your architecture:
+./scripts/bake.sh --load --set '*.platform=linux/amd64'
 ```

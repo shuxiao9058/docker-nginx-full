@@ -6,12 +6,11 @@ YELLOW='\E[1;33m'
 GREEN='\E[1;32m'
 RESET='\E[0m'
 
-DOCKER_IMAGE="nginxproxymanager/nginx-full"
+DOCKER_IMAGE="shuxiao9058/nginx-full:1.31.9.1"
 
-export OPENRESTY_VERSION=1.25.3.1
-export CROWDSEC_OPENRESTY_BOUNCER_VERSION=0.1.7
+export OPENRESTY_VERSION=1.31.9.1
 export LUA_VERSION=5.1.5
-export LUAROCKS_VERSION=3.3.1
+export LUAROCKS_VERSION=3.13.0
 
 # Builds
 

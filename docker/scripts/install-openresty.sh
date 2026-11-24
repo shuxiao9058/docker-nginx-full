@@ -8,7 +8,7 @@ RESET='\E[0m'
 
 echo -e "${BLUE}❯ ${CYAN}Installing OpenResty ${YELLOW}${OPENRESTY_VERSION}...${RESET}"
 
-cd /tmp/openresty
+cd "/tmp/openresty/openresty-${OPENRESTY_VERSION}"
 make install
 rm -rf /tmp/openresty
 
@@ -19,6 +19,6 @@ echo -e "${BLUE}❯ ${CYAN}Installing OpenResty plugins...${RESET}"
 cd /
 luarocks install lua-cjson
 luarocks install lua-resty-openidc
-#luarocks install lua-resty-http
+# luarocks install lua-resty-http
 
 echo -e "${BLUE}❯ ${GREEN}OpenResty plugins install completed${RESET}"

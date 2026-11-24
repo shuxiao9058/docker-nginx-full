@@ -1,15 +1,15 @@
-ARG CERTBOT_IMAGE=nginxproxymanager/nginx-full:certbot
-FROM $CERTBOT_IMAGE AS final
-ARG CERTBOT_IMAGE
+FROM certbot AS final
+
 ARG TARGETPLATFORM
+ARG NODE_MAJOR=26
 
 LABEL maintainer="Jamie Curnow <jc@jc21.com>"
 
-RUN echo "Node: $CERTBOT_IMAGE, ${TARGETPLATFORM:-linux/amd64}" >> /built-for-arch
+RUN echo "Certbot + Node, ${TARGETPLATFORM:-linux/amd64}" >> /built-for-arch
 
 ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
 	&& apt-get update \
 	&& apt-get install -y gcc make g++ git nodejs \
 	&& apt-get clean \
@@ -17,10 +17,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 	&& npm install -g yarn \
 	&& ln -s /usr/bin/python3 /usr/bin/python
 
-COPY ./files/.bashrc.certbot-node /root/.bashrc
+COPY ./docker/files/.bashrc.certbot-node /root/.bashrc
 
 # Check nodejs works on this architecture
-COPY ./files/test.js /tmp/test.js
+COPY ./docker/files/test.js /tmp/test.js
 RUN node /tmp/test.js \
 	&& rm -f /tmp/test.js
 
