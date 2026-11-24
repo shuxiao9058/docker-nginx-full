@@ -8,7 +8,7 @@ variable "TAG_PREFIX" {
 	default = ""
 }
 variable "OPENRESTY_VERSION" {
-	default = "1.31.8.1"
+	default = "1.31.9.1"
 }
 variable "NODE_MAJOR" {
 	default = "26"
